@@ -42,6 +42,7 @@ type Project = {
   summary: string;
   finding?: string;
   demo?: string;
+  repo?: string;
   images: { src: ImageMetadata; alt: string }[];
 };
 
@@ -55,6 +56,7 @@ const projects: Project[] = [
       'Simulador de eventos discretos paso a paso para optimizar el reabastecimiento de un SKU de alta rotación (<code>RT-W6-100</code>) bajo demanda aleatoria <code>Poisson(λ=8)</code> y tiempos de entrega variables (2 a 5 días) con ventas perdidas. Incluye verificación estructural (19 chequeos y 10 tests <code>pytest</code>), optimización en grilla en dos etapas y evaluación confirmatoria sobre 100 réplicas con Números Aleatorios Comunes (CRN).',
     finding:
       'La política optimizada <code>(s*=53, Q*=220)</code> reduce el costo anual esperado en un <span class="font-semibold text-positive">-60,1% frente al EOQ base</span> (de 4.168 a 1.664 USD/año) y un <strong>-8,8%</strong> frente a la heurística analítica, elevando el <em>Fill Rate</em> al <strong>99,95%</strong> y el <em>Cycle Service Level</em> del 43,7% al 97,0%.',
+    repo: 'https://github.com/joaquin-tabarcache/simulacion-inventarios',
     images: [
       { src: previewSimCostos, alt: 'Composición del costo anual por escenario — Simulación de inventarios' },
       { src: previewSimHeatmap, alt: 'Superficie de costo total y refinamiento fino (s, Q)' },
@@ -265,6 +267,11 @@ const projects: Project[] = [
               {p.demo && (
                 <a href={p.demo} target="_blank" rel="noopener noreferrer" class="text-link">
                   Probá la demo <span aria-hidden="true">↗</span>
+                </a>
+              )}
+              {p.repo && (
+                <a href={p.repo} target="_blank" rel="noopener noreferrer" class="text-link">
+                  Ver repositorio en GitHub <span aria-hidden="true">↗</span>
                 </a>
               )}
             </div>
