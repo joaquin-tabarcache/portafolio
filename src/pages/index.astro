@@ -43,6 +43,7 @@ type Project = {
   finding?: string;
   demo?: string;
   repo?: string;
+  excel?: string;
   images: { src: ImageMetadata; alt: string }[];
 };
 
@@ -95,6 +96,7 @@ const projects: Project[] = [
       'Análisis comercial sobre un catálogo de <strong>1.465 productos</strong> para evaluar la elasticidad de precios, agresividad de descuentos y satisfacción del cliente. Implementé un pipeline ETL en <strong>Power Query</strong> para desagregar jerarquías de 5 niveles, limpiar formatos monetarios y crear variables de segmentación ordinal (<code>price_segment</code> y <code>discount_bucket</code>).',
     finding:
       'Se demostró que aplicar descuentos agresivos (40%–60%) no deteriora la percepción de calidad (rating estable en ~4.0), y se detectó una alerta crítica de insatisfacción en la línea <code>Home &amp; Kitchen</code> (ratings &lt; 3.5) que requiere auditoría de proveedores.',
+    excel: 'https://1drv.ms/x/c/0832a52185e62b0c/IQB1DBePbaigQICFUk0PJKY3AUZNfLJ1Xtqc76RS_nageow?e=HzKQmk',
     images: [
       { src: previewAmazon1, alt: 'Dashboard en Excel — Caso Amazon India' },
       { src: previewAmazon2, alt: 'Visualizaciones del dashboard — Caso Amazon India' },
@@ -272,6 +274,11 @@ const projects: Project[] = [
               {p.repo && (
                 <a href={p.repo} target="_blank" rel="noopener noreferrer" class="text-link">
                   Ver repositorio en GitHub <span aria-hidden="true">↗</span>
+                </a>
+              )}
+              {p.excel && (
+                <a href={p.excel} target="_blank" rel="noopener noreferrer" class="text-link">
+                  Ver Excel en OneDrive <span aria-hidden="true">↗</span>
                 </a>
               )}
             </div>
