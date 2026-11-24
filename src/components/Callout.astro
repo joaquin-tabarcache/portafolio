@@ -1,0 +1,17 @@
+---
+interface Props {
+  variant?: 'default' | 'alert';
+  icon?: string;
+}
+
+const { variant = 'default' } = Astro.props;
+---
+
+<aside
+  class:list={[
+    'my-7 border-l-2 py-1 pl-5 text-[0.98rem] leading-relaxed [&>p]:m-0 [&>p+p]:mt-3.5 [&>ul]:my-0',
+    variant === 'alert' ? 'border-crimson/60' : 'border-accent/70',
+  ]}
+>
+  <slot />
+</aside>

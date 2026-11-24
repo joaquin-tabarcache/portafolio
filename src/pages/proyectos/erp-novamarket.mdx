@@ -1,0 +1,182 @@
+---
+layout: ../../layouts/ProjectLayout.astro
+number: "03"
+title: "Dashboards ejecutivos para un ERP: ventas, stock y compras en tiempo real"
+description: "Módulo de dashboards ejecutivos y reportería PDF para el sistema ERP NovaMarket, con KPIs en tiempo real, gráficos interactivos en Recharts y persistencia en MySQL con Prisma ORM."
+stack: ["Next.js 15", "React 19", "TypeScript", "Prisma ORM", "MySQL", "Tailwind CSS", "Recharts", "jsPDF"]
+meta:
+  - label: "Rol"
+    value: "Full Stack Developer"
+  - label: "Tipo"
+    value: "ERP & Data Visualization"
+  - label: "Stack principal"
+    value: "Next.js 15 · Prisma · MySQL"
+  - label: "Estado"
+    value: "Terminado / Producción"
+externalLink:
+  label: "Probar Demo en Vivo"
+  href: "https://novamarket-erp-demo.vercel.app/erp/reportes/reportesventas"
+prev:
+  title: "Análisis de Estados Financieros 2022–2024 | Power BI"
+  href: "/proyectos/analisis-estados-financieros"
+next:
+  title: "Data Cleaning & Business Intelligence: Caso Amazon India"
+  href: "/proyectos/caso-amazon-india"
+---
+
+import Figure from '../../components/Figure.astro';
+import ImageGrid from '../../components/ImageGrid.astro';
+import YouTubeEmbed from '../../components/YouTubeEmbed.astro';
+import imgCover from '../../assets/images/novamarket/cover.png';
+import imgPreview1 from '../../assets/images/home/preview-novamarket-1.png';
+import imgPreview2 from '../../assets/images/home/preview-novamarket-2.png';
+
+<Figure
+  src={imgCover}
+  alt="Portada del sistema ERP NovaMarket"
+  caption="Vista principal del módulo de reportes ejecutivos de NovaMarket ERP."
+/>
+
+## Video demostrativo
+
+<YouTubeEmbed
+  videoId="x7MjGpYhzV8"
+  title="Video demostrativo de Dashboards ejecutivos para el ERP NovaMarket"
+/>
+
+<ImageGrid>
+  <Figure
+    src={imgPreview1}
+    alt="Dashboard de ventas y métricas en ERP NovaMarket"
+    caption="Panel de ventas con KPIs en tiempo real y distribución por medio de pago."
+    compact
+  />
+  <Figure
+    src={imgPreview2}
+    alt="Control de stock y evolución en ERP NovaMarket"
+    caption="Panel de artículos, alertas de stock crítico y evolución temporal."
+    compact
+  />
+</ImageGrid>
+
+## ¿Qué muestra cada Reporte?
+
+### A. Reporte ventas
+
+- **Filtro dinámico de período:** Todo el historial, Este mes, Últimos 3 meses, 6 meses o 12 meses.
+- **Métricas:**
+  - Total de transacciones / comprobantes emitidos.
+  - Clientes únicos compradores.
+  - Facturación bruta total acumulada.
+  - Ticket promedio por venta.
+- **Gráficos:**
+  - **Distribución por Medio de Pago:** Donut interactivo con cantidad de ventas por método.
+  - **Valor por Medio de Pago:** Gráfico de barras horizontal con el importe total recaudado por canal de cobro.
+  - **Evolución Temporal (12 Meses):** Gráfico de Doble Área (monto en pesos en el eje derecho vs. cantidad de ventas en el eje izquierdo).
+- **Tablas de Ranking:**
+  - Top 10 Clientes por Monto Total Facturado.
+  - Top 10 Clientes por Frecuencia de Compra (mayor cantidad de visitas).
+  - Top 10 Artículos Más Vendidos en volumen físico (unidades).
+  - Top 10 Artículos con Mayor Ingreso Monetario Generado ($).
+
+### B. Reporte de Artículos y Stock
+
+- **Métricas calculadas por API:**
+  - Total de artículos activos.
+  - Artículos sin stock (= 0 unidades).
+  - Artículos con stock bajo (≤ 10 unidades).
+  - Stock total valorizado y costo promedio ponderado de compra.
+- **Gráficos:**
+  - **Stock por Marca:** Gráfico de barras horizontales ordenado por unidades físicas en inventario (con tipografía en negrita).
+  - **Top Categorías Más Valiosas:** Barras horizontales con el capital inmovilizado por rubro.
+  - **Distribución de Artículos por Categoría:** Gráfico Donut con porcentaje y cantidad de referencias.
+  - **Stock por Depósito:** Desglose de unidades y valor total distribuido por almacén/sucursal.
+  - **Evolución del Catálogo:** Gráfico de líneas (artículos nuevos mensuales vs. total acumulado histórico).
+- **Tablas de Rendimiento:**
+  - Top 10 Artículos Más Valiosos (con stock, costo unitario y capital total).
+  - Top 10 Artículos con Mayor Stock Físico.
+
+### C. Reporte de Compras y Proveedores
+
+- **Filtro dinámico de período temporal.**
+- **Métricas:**
+  - Total de proveedores activos.
+  - Proveedores inactivos / sin compras en el período.
+  - Gasto total consolidado en compras.
+  - Compra promedio por proveedor.
+- **Gráficos:**
+  - **Top 10 Proveedores por Valor:** Gráfico de barras horizontal que muestra a quién se le compró más mercadería.
+  - **Concentración de Compras (Top 5):** Donut con el porcentaje de compra retenido por los 5 proveedores clave.
+  - **Proveedores por Frecuencia:** Barras horizontales según número de comprobantes emitidos.
+  - **Evolución Histórica de Abastecimiento:** Gráfico de área dual comparando volumen monetario vs. número de pedidos.
+- **Tablas:**
+  - Top 10 Proveedores por Monto ($).
+  - Top 10 Proveedores por Número de Órdenes de Compra.
+
+### D. Módulo de Exportación PDF
+
+- **Generador con `jsPDF` y `jspdf-autotable` con diseño institucional:**
+  - Encabezado con banner corporativo.
+  - Resumen ejecutivo con 4 tarjetas KPI con colores de acento.
+  - Tablas formateadas con alineación numérica a la derecha y subtotales en pesos.
+
+## 4. Stack Tecnológico (Auditado en el código real)
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Categoría</th>
+        <th>Tecnología Utilizada</th>
+        <th>Detalle de Implementación</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Framework</strong></td>
+        <td>Next.js 15.3 (App Router)</td>
+        <td>Server Components para SSR rápido y Route Handlers (<code>api/route.ts</code>).</td>
+      </tr>
+      <tr>
+        <td><strong>Librería UI</strong></td>
+        <td>React 19</td>
+        <td>Componentes de cliente interactivos, animaciones y hooks modernos.</td>
+      </tr>
+      <tr>
+        <td><strong>Lenguaje</strong></td>
+        <td>TypeScript 5.7</td>
+        <td>Tipado estricto en interfaces de bases de datos, APIs y props de gráficos.</td>
+      </tr>
+      <tr>
+        <td><strong>Estilos</strong></td>
+        <td>Tailwind CSS 3.4</td>
+        <td>Diseño responsivo, soporte de dark/light mode con variables HSL.</td>
+      </tr>
+      <tr>
+        <td><strong>Componentes</strong></td>
+        <td>shadcn/ui</td>
+        <td>Base de componentes accesibles (Radix UI: Dialogs, Selects, Tables, Cards).</td>
+      </tr>
+      <tr>
+        <td><strong>Data Viz</strong></td>
+        <td>Recharts 2.15</td>
+        <td>Gráficos adaptativos (ResponsiveContainer, AreaChart, BarChart horizontal, PieChart).</td>
+      </tr>
+      <tr>
+        <td><strong>ORM</strong></td>
+        <td>Prisma 6.15</td>
+        <td>Consultas relacionales optimizadas, agregaciones y modelos tipados.</td>
+      </tr>
+      <tr>
+        <td><strong>Base de Datos</strong></td>
+        <td>MySQL</td>
+        <td>Motor relacional para ventas, comprobantes, compras y control de stock.</td>
+      </tr>
+      <tr>
+        <td><strong>Reportes</strong></td>
+        <td>jsPDF 4.2 + autotable</td>
+        <td>Renderizado del lado del cliente de planillas y reportes ejecutivos en PDF.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

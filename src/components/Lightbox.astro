@@ -1,0 +1,90 @@
+<div
+  id="lightbox-modal"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Vista ampliada de imagen"
+  class="fixed inset-0 z-50 hidden items-center justify-center bg-zinc-950/85 p-4 backdrop-blur-xs sm:p-8"
+>
+  <button
+    id="lightbox-close"
+    type="button"
+    aria-label="Cerrar vista ampliada"
+    class="absolute top-4 right-4 z-10 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-zinc-900/80 text-white transition hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-white/40 cursor-pointer"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M18 6 6 18" />
+      <path d="m6 6 12 12" />
+    </svg>
+  </button>
+
+  <div class="relative flex max-h-full max-w-6xl flex-col items-center justify-center">
+    <img
+      id="lightbox-img"
+      src=""
+      alt=""
+      class="max-h-[85vh] max-w-full rounded-lg border border-white/10 bg-white object-contain shadow-2xl"
+    />
+    <p
+      id="lightbox-caption"
+      class="mt-3 hidden max-w-2xl text-center text-sm text-zinc-200"
+    ></p>
+  </div>
+</div>
+
+<script is:inline>
+  (() => {
+    const modal = document.getElementById('lightbox-modal');
+    const img = document.getElementById('lightbox-img');
+    const caption = document.getElementById('lightbox-caption');
+    const closeBtn = document.getElementById('lightbox-close');
+    if (!modal || !img || !caption || !closeBtn) return;
+
+    function openLightbox(target) {
+      const src = target.dataset.fullSrc || target.currentSrc || target.getAttribute('src');
+      if (!src) return;
+      img.src = src;
+      img.alt = target.getAttribute('alt') || '';
+      const cap = target.dataset.caption || target.getAttribute('alt') || '';
+      if (cap && cap !== 'Captura de proyecto') {
+        caption.textContent = cap;
+        caption.classList.remove('hidden');
+      } else {
+        caption.textContent = '';
+        caption.classList.add('hidden');
+      }
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+      closeBtn.focus();
+    }
+
+    function closeLightbox() {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      img.src = '';
+      document.body.style.overflow = '';
+    }
+
+    document.addEventListener('click', (event) => {
+      const target = event.target instanceof Element ? event.target.closest('[data-lightbox]') : null;
+      if (target instanceof HTMLImageElement) {
+        event.preventDefault();
+        openLightbox(target);
+      }
+    });
+
+    closeBtn.addEventListener('click', closeLightbox);
+
+    modal.addEventListener('click', (event) => {
+      if (event.target === modal) {
+        closeLightbox();
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !modal.classList.contains('hidden')) {
+        closeLightbox();
+      }
+    });
+  })();
+</script>

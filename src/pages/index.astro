@@ -1,0 +1,325 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+import profileImg from '../assets/images/home/profile.png';
+import skillSql from '../assets/images/home/skill-3.png';
+import skillPowerBi from '../assets/images/home/skill-powerbi.png';
+import skillPython from '../assets/images/home/skill-7.png';
+import skillGithub from '../assets/images/home/skill-8.png';
+import skillTs from '../assets/images/home/skill-ts.png';
+import skillTool from '../assets/images/home/skill-4.png';
+import skillNextjs from '../assets/images/home/skill-nextjs.png';
+
+import previewSimCostos from '../assets/images/simulacion-inventarios/02-composicion-costos.png';
+import previewSimHeatmap from '../assets/images/simulacion-inventarios/03-heatmap-optimizacion.png';
+import previewFinancieros from '../assets/images/home/preview-estados-financieros.png';
+import previewNovamarket1 from '../assets/images/home/preview-novamarket-1.png';
+import previewNovamarket2 from '../assets/images/home/preview-novamarket-2.png';
+import previewAmazon1 from '../assets/images/home/preview-amazon-1.png';
+import previewAmazon2 from '../assets/images/home/preview-amazon-2.png';
+import previewSql from '../assets/images/home/preview-sql.png';
+
+type Skill = { src: ImageMetadata | string; alt: string };
+
+const skills: Skill[] = [
+  { src: '/images/skill-excel.svg', alt: 'Microsoft Excel' },
+  { src: skillSql, alt: 'SQL' },
+  { src: skillPowerBi, alt: 'Power BI' },
+  { src: skillPython, alt: 'Python' },
+  { src: skillTs, alt: 'TypeScript' },
+  { src: skillNextjs, alt: 'Next.js' },
+  { src: skillGithub, alt: 'GitHub' },
+  { src: skillTool, alt: 'Orca IDE' },
+];
+
+type Project = {
+  number: string;
+  href: string;
+  title: string;
+  stack: string[];
+  summary: string;
+  finding?: string;
+  demo?: string;
+  images: { src: ImageMetadata; alt: string }[];
+};
+
+const projects: Project[] = [
+  {
+    number: '01',
+    href: '/proyectos/simulacion-inventarios',
+    title: 'Simulación y Optimización de Políticas de Inventarios en Python',
+    stack: ['Python', 'NumPy', 'SciPy', 'Pandas', 'Matplotlib', 'pytest'],
+    summary:
+      'Simulador de eventos discretos paso a paso para optimizar el reabastecimiento de un SKU de alta rotación (<code>RT-W6-100</code>) bajo demanda aleatoria <code>Poisson(λ=8)</code> y tiempos de entrega variables (2 a 5 días) con ventas perdidas. Incluye verificación estructural (19 chequeos y 10 tests <code>pytest</code>), optimización en grilla en dos etapas y evaluación confirmatoria sobre 100 réplicas con Números Aleatorios Comunes (CRN).',
+    finding:
+      'La política optimizada <code>(s*=53, Q*=220)</code> reduce el costo anual esperado en un <span class="font-semibold text-positive">-60,1% frente al EOQ base</span> (de 4.168 a 1.664 USD/año) y un <strong>-8,8%</strong> frente a la heurística analítica, elevando el <em>Fill Rate</em> al <strong>99,95%</strong> y el <em>Cycle Service Level</em> del 43,7% al 97,0%.',
+    images: [
+      { src: previewSimCostos, alt: 'Composición del costo anual por escenario — Simulación de inventarios' },
+      { src: previewSimHeatmap, alt: 'Superficie de costo total y refinamiento fino (s, Q)' },
+    ],
+  },
+  {
+    number: '02',
+    href: '/proyectos/analisis-estados-financieros',
+    title: 'Análisis de Estados Financieros',
+    stack: ['Power BI', 'DAX', 'Modelado de Datos', 'Finanzas'],
+    summary:
+      'Desarrollo de una solución de Business Intelligence para auditar la salud financiera y patrimonial de <em>InfoEstrategias S.A.</em> (período 2022–2024). Modelé los datos contables y desarrollé medidas dinámicas en <strong>DAX</strong> para automatizar el cálculo de KPIs críticos (Liquidez Corriente, Prueba Ácida, Endeudamiento y Solvencia) junto con variaciones interanuales (YoY).',
+    finding:
+      'El tablero permite detectar cuellos de botella en el capital de trabajo a corto plazo y visualizar cómo el crecimiento del activo total (<span class="font-semibold text-positive">+25,2% de crecimiento del Activo Total</span>) fue apalancado principalmente por patrimonio neto, reduciendo el riesgo financiero hacia 2024.',
+    images: [{ src: previewFinancieros, alt: 'Dashboard de Power BI — Análisis de Estados Financieros' }],
+  },
+  {
+    number: '03',
+    href: '/proyectos/erp-novamarket',
+    title: 'Panel de control y reportes de un ERP (NovaMarket) con KPIs, gráficos interactivos y alertas de stock crítico',
+    stack: ['Next.js', 'TypeScript', 'Prisma', 'MySQL', 'Shadcn', 'Tailwind'],
+    summary:
+      'En este proyecto que realicé para la materia de Sistemas 3, se puede observar un módulo de dashboards de NovaMarket, un ERP que gestiona inventario, ventas y compras. Muestra KPIs en tiempo real de facturación, control de stock y compras con gráficos interactivos Recharts, filtrado dinámico y exportación a PDF corporativo.',
+    demo: 'https://novamarket-erp-demo.vercel.app/erp/reportes/reportesventas',
+    images: [
+      { src: previewNovamarket1, alt: 'ERP NovaMarket — Reporte de ventas y KPIs' },
+      { src: previewNovamarket2, alt: 'ERP NovaMarket — Evolución de ventas y rankings' },
+    ],
+  },
+  {
+    number: '04',
+    href: '/proyectos/caso-amazon-india',
+    title: 'Análisis de Mercado y Comportamiento del Consumidor en Amazon India',
+    stack: ['Excel', 'Power Query', 'Business Intelligence'],
+    summary:
+      'Análisis comercial sobre un catálogo de <strong>1.465 productos</strong> para evaluar la elasticidad de precios, agresividad de descuentos y satisfacción del cliente. Implementé un pipeline ETL en <strong>Power Query</strong> para desagregar jerarquías de 5 niveles, limpiar formatos monetarios y crear variables de segmentación ordinal (<code>price_segment</code> y <code>discount_bucket</code>).',
+    finding:
+      'Se demostró que aplicar descuentos agresivos (40%–60%) no deteriora la percepción de calidad (rating estable en ~4.0), y se detectó una alerta crítica de insatisfacción en la línea <code>Home &amp; Kitchen</code> (ratings &lt; 3.5) que requiere auditoría de proveedores.',
+    images: [
+      { src: previewAmazon1, alt: 'Dashboard en Excel — Caso Amazon India' },
+      { src: previewAmazon2, alt: 'Visualizaciones del dashboard — Caso Amazon India' },
+    ],
+  },
+  {
+    number: '05',
+    href: '/proyectos/despidos-tech-sql',
+    title: 'Limpieza y Análisis Exploratorio de Datos de Despidos',
+    stack: ['MySQL', 'Data Wrangling', 'Window Functions & CTEs'],
+    summary:
+      'Auditoría, limpieza y análisis exploratorio (EDA) en <strong>SQL</strong> sobre un dataset global de despidos en el sector tecnológico. Implementé tablas de <em>staging</em>, <strong>CTEs</strong> y funciones de ventana (<code>ROW_NUMBER()</code>, <code>DENSE_RANK()</code>, <code>SUM() OVER()</code>) para eliminar duplicados sin clave primaria, imputar valores nulos mediante <em>Self-Joins</em>, estandarizar series temporales y construir rankings acumulados (<em>rolling totals</em>) de impacto por industria y año.',
+    images: [{ src: previewSql, alt: 'Consulta SQL — Análisis de despidos en tecnología' }],
+  },
+];
+---
+
+<BaseLayout
+  title="Leandro Joaquín Tabarcache — Analista de Datos"
+  description="Portafolio de Leandro Joaquín Tabarcache, Analista de Datos y estudiante de 5.º año de Ingeniería Informática (UCASAL). Proyectos en Power BI, SQL, Excel, Python y Next.js."
+>
+  <!-- Hero -->
+  <section id="sobre-mi" class="mx-auto max-w-6xl px-6 pt-16 pb-20 sm:px-10 sm:pt-24 sm:pb-28">
+    <div class="grid grid-cols-1 gap-14 lg:grid-cols-12 lg:gap-16">
+      <div class="lg:col-span-7 lg:pt-2">
+        <p class="eyebrow">Mi Portafolio de Analista de Datos</p>
+
+        <h1 class="mt-6 text-[2.15rem] leading-[1.1] font-medium sm:text-[3.4rem] sm:leading-[1.08]">
+          Hola, soy Joaquín.
+          <span class="block text-ink-muted">Transformo datos crudos en respuestas de negocio.</span>
+        </h1>
+
+        <div class="mt-9 max-w-xl space-y-4 text-[1.05rem] leading-relaxed text-ink-secondary">
+          <p>
+            Soy <strong class="font-semibold text-ink">Analista de Datos</strong> y estudiante del último año de
+            <strong class="font-semibold text-ink">Ingeniería Informática</strong> (5to año) en la UCASAL.
+          </p>
+          <p>
+            Combino una base sólida en ingeniería de software y bases de datos con herramientas de Business
+            Intelligence (<strong class="font-semibold text-ink">SQL, Python, Power BI y Excel</strong>) para transformar
+            datos crudos en tableros ejecutivos y respuestas de negocio.
+          </p>
+          <p>
+            Me enfoco en el diseño de procesos ETL, modelado de datos y automatización de reportes para optimizar la
+            toma de decisiones operativas y financieras.
+          </p>
+        </div>
+
+        <div class="mt-10 flex flex-wrap items-center gap-x-7 gap-y-4">
+          <a
+            href="/CV_Leandro_Joaquin_Tabarcache.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-2 rounded-md bg-ink px-5 py-3 text-sm font-medium text-canvas transition hover:bg-accent"
+          >
+            Ver Currículum Vitae
+            <span aria-hidden="true">↗</span>
+          </a>
+          <a href="#proyectos" class="text-link">
+            Ver proyectos <span class="arrow" aria-hidden="true">→</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="lg:col-span-5">
+        <div class="mx-auto max-w-sm lg:ml-auto lg:max-w-[380px]">
+          <div class="aspect-[4/5] overflow-hidden rounded-md bg-subtle">
+            <Image
+              src={profileImg}
+              alt="Retrato de Leandro Joaquín Tabarcache"
+              quality={92}
+              widths={[400, 760]}
+              sizes="(min-width: 1024px) 380px, 90vw"
+              class="h-full w-full object-cover object-[50%_35%]"
+              loading="eager"
+            />
+          </div>
+          <dl class="mt-6 text-sm">
+            <div class="flex justify-between gap-4 border-t border-border py-2.5">
+              <dt class="text-ink-muted">Rol</dt>
+              <dd class="font-medium text-ink">Analista de Datos</dd>
+            </div>
+            <div class="flex justify-between gap-4 border-t border-border py-2.5">
+              <dt class="text-ink-muted">Formación</dt>
+              <dd class="text-right font-medium text-ink">Ing. Informática · UCASAL (5.º año)</dd>
+            </div>
+            <div class="flex justify-between gap-4 border-y border-border py-2.5">
+              <dt class="text-ink-muted">Foco</dt>
+              <dd class="text-right font-medium text-ink">ETL · Modelado · Reportes</dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Habilidades -->
+  <section id="habilidades" class="border-y border-border bg-surface">
+    <div class="mx-auto grid max-w-6xl grid-cols-1 items-center gap-8 px-6 py-12 sm:px-10 lg:grid-cols-12">
+      <div class="lg:col-span-3">
+        <p class="eyebrow">Herramientas</p>
+        <h2 class="mt-2 text-xl leading-snug">Habilidades Técnicas y Profesionales</h2>
+      </div>
+      <ul class="grid grid-cols-4 gap-x-6 gap-y-8 sm:grid-cols-8 lg:col-span-9">
+        {skills.map((skill) => (
+          <li class="group relative flex h-12 items-center justify-center outline-none" tabindex="0" aria-label={skill.alt}>
+            {typeof skill.src === 'string' ? (
+              <img src={skill.src} alt="" class="max-h-10 w-auto max-w-[48px] object-contain transition-transform duration-200 group-hover:-translate-y-0.5 group-focus-visible:-translate-y-0.5" loading="lazy" />
+            ) : (
+              <Image src={skill.src} alt="" quality={95} width={96} class="max-h-10 w-auto max-w-[48px] rounded-[6px] object-contain transition-transform duration-200 group-hover:-translate-y-0.5 group-focus-visible:-translate-y-0.5" />
+            )}
+            <span
+              role="tooltip"
+              class="pointer-events-none absolute top-full left-1/2 z-10 mt-2.5 -translate-x-1/2 translate-y-1 rounded-sm bg-ink px-2 py-1 text-[0.72rem] font-medium whitespace-nowrap text-canvas opacity-0 transition duration-150 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100"
+            >
+              {skill.alt}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- Proyectos -->
+  <section id="proyectos" class="mx-auto max-w-6xl px-6 pt-24 sm:px-10">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <p class="eyebrow">Casos de estudio</p>
+        <h2 class="mt-3 text-3xl sm:text-[2.4rem]">Proyectos Destacados</h2>
+      </div>
+      <p class="max-w-sm text-sm text-ink-muted">
+        Cinco proyectos de punta a punta: modelado, simulación, limpieza, análisis y visualización.
+      </p>
+    </div>
+
+    <div class="mt-12">
+      {projects.map((p) => (
+        <article class="grid grid-cols-1 gap-10 border-t border-border py-14 lg:grid-cols-12 lg:gap-14">
+          <div class="lg:col-span-6">
+            <div class="flex items-baseline gap-4">
+              <span class="font-mono text-sm text-ink-muted">{p.number}</span>
+              <p class="font-mono text-[0.72rem] tracking-wide text-ink-muted uppercase">
+                {p.stack.join(' / ')}
+              </p>
+            </div>
+
+            <h3 class="mt-4 text-[1.6rem] leading-[1.22]">
+              <a href={p.href} class="transition-colors hover:text-accent">{p.title}</a>
+            </h3>
+
+            <p
+              class="mt-5 leading-relaxed text-ink-secondary [&_code]:rounded-sm [&_code]:bg-subtle [&_code]:px-1 [&_code]:font-mono [&_code]:text-[0.85em] [&_code]:text-ink [&_em]:text-ink [&_strong]:font-semibold [&_strong]:text-ink"
+              set:html={p.summary}
+            />
+
+            {p.finding && (
+              <div class="mt-6 border-l-2 border-accent/70 pl-4">
+                <p class="insight-label">Impacto / Hallazgo clave</p>
+                <p
+                  class="text-[0.95rem] leading-relaxed text-ink-secondary [&_code]:rounded-sm [&_code]:bg-subtle [&_code]:px-1 [&_code]:font-mono [&_code]:text-[0.85em] [&_code]:text-ink"
+                  set:html={p.finding}
+                />
+              </div>
+            )}
+
+            <div class="mt-8 flex flex-wrap items-center gap-x-7 gap-y-3">
+              <a href={p.href} class="text-link">
+                Leer caso de estudio <span class="arrow" aria-hidden="true">→</span>
+              </a>
+              {p.demo && (
+                <a href={p.demo} target="_blank" rel="noopener noreferrer" class="text-link">
+                  Probá la demo <span aria-hidden="true">↗</span>
+                </a>
+              )}
+            </div>
+          </div>
+
+          <div class="space-y-4 lg:col-span-6">
+            {p.images.map((img) => (
+              <div class="overflow-hidden rounded-md border border-border bg-surface">
+                <Image
+                  src={img.src}
+                  alt={img.alt}
+                  quality={90}
+                  class="block h-auto w-full"
+                  data-lightbox
+                  data-caption={img.alt}
+                />
+              </div>
+            ))}
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <!-- Contacto -->
+  <section id="contacto" class="mx-auto mt-10 max-w-6xl px-6 pb-24 sm:px-10">
+    <div class="grid grid-cols-1 gap-10 border-t border-ink pt-14 lg:grid-cols-12">
+      <div class="lg:col-span-6">
+        <p class="eyebrow">Contacto</p>
+        <h2 class="mt-3 text-3xl leading-tight sm:text-[2.4rem]">Hablemos de datos.</h2>
+        <a
+          href="mailto:tabarcachejoaquin@gmail.com"
+          class="mt-6 inline-block font-serif text-xl text-accent underline decoration-accent/30 underline-offset-4 transition hover:decoration-accent sm:text-2xl"
+        >
+          tabarcachejoaquin@gmail.com
+        </a>
+      </div>
+      <dl class="self-end text-sm lg:col-span-5 lg:col-start-8">
+        <div class="flex justify-between gap-4 border-t border-border py-3">
+          <dt class="text-ink-muted">LinkedIn</dt>
+          <dd><a href="https://www.linkedin.com/in/joaquin-tabarcache-ba9bb8271/" target="_blank" rel="noopener noreferrer" class="font-medium text-ink hover:text-accent">joaquin-tabarcache ↗</a></dd>
+        </div>
+        <div class="flex justify-between gap-4 border-t border-border py-3">
+          <dt class="text-ink-muted">GitHub</dt>
+          <dd><a href="https://github.com/joaquin-tabarcache" target="_blank" rel="noopener noreferrer" class="font-medium text-ink hover:text-accent">joaquin-tabarcache ↗</a></dd>
+        </div>
+        <div class="flex justify-between gap-4 border-t border-border py-3">
+          <dt class="text-ink-muted">Teléfono</dt>
+          <dd><a href="tel:+543876008755" class="font-medium text-ink hover:text-accent">+54 3876008755</a></dd>
+        </div>
+        <div class="flex justify-between gap-4 border-y border-border py-3">
+          <dt class="text-ink-muted">Currículum</dt>
+          <dd><a href="/CV_Leandro_Joaquin_Tabarcache.pdf" target="_blank" rel="noopener noreferrer" class="font-medium text-ink hover:text-accent">Descargar PDF ↓</a></dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+</BaseLayout>

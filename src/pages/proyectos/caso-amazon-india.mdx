@@ -1,0 +1,274 @@
+---
+layout: ../../layouts/ProjectLayout.astro
+number: "04"
+title: "Data Cleaning & Business Intelligence: Caso Amazon India"
+description: "Análisis comercial sobre un catálogo de 1.465 productos de Amazon India con pipeline ETL en Power Query y dashboard interactivo en Excel."
+stack: ["Excel", "Power Query", "ETL", "Business Intelligence", "Storytelling"]
+meta:
+  - label: "Fecha"
+    value: "Abril 2025"
+  - label: "Rol"
+    value: "Analista de datos"
+  - label: "Dataset"
+    value: "1.465 productos (Kaggle)"
+externalLink:
+  label: "Ver Proyecto Terminado en Excel (OneDrive)"
+  href: "https://1drv.ms/x/c/0832a52185e62b0c/IQB1DBePbaigQICFUk0PJKY3AUZNfLJ1Xtqc76RS_nageow?e=HzKQmk"
+prev:
+  title: "Dashboards ejecutivos para un ERP: ventas, stock y compras en tiempo real"
+  href: "/proyectos/erp-novamarket"
+next:
+  title: "Auditoría, Limpieza (Data Cleaning) y EDA en SQL: Despidos en Tech"
+  href: "/proyectos/despidos-tech-sql"
+---
+
+import Figure from '../../components/Figure.astro';
+import Callout from '../../components/Callout.astro';
+import img01 from '../../assets/images/amazon-india/01-dataset.png';
+import img02 from '../../assets/images/amazon-india/02-etl.png';
+import img03 from '../../assets/images/amazon-india/03-categorias-precios.png';
+import img04 from '../../assets/images/amazon-india/04-top8-subcategorias.png';
+import img05 from '../../assets/images/amazon-india/05-peores-subcategorias.png';
+import img06 from '../../assets/images/amazon-india/06-descuento-calidad.png';
+import img07 from '../../assets/images/amazon-india/07-segmento-precio.png';
+import img08 from '../../assets/images/amazon-india/08-dashboard-1.png';
+import img09 from '../../assets/images/amazon-india/09-dashboard-2.png';
+
+# 1. Resumen del Proyecto
+
+- **Objetivo:** Identificar patrones de precios, impacto de descuentos y correlación de satisfacción del cliente mediante métricas de ventas y reseñas
+- **Fecha:** Abril 2025
+- **Rol:** Analista de datos
+- **Stack Tecnológico:** Excel, Power Query
+- **Habilidades Aplicadas:** *Limpieza de datos, Modelado de datos*, *Visualización* y *Storytelling*.
+
+## 1.1 Ver Proyecto Terminado
+
+<Callout variant="alert">
+  <p>
+    <strong>Link para ver el proyecto terminado:</strong>
+    <a href="https://1drv.ms/x/c/0832a52185e62b0c/IQB1DBePbaigQICFUk0PJKY3AUZNfLJ1Xtqc76RS_nageow?e=HzKQmk" target="_blank" rel="noopener noreferrer">
+      Abrir libro de Excel en OneDrive
+    </a>
+  </p>
+</Callout>
+
+## 1.2 Contexto de Negocio
+
+El proyecto se enfoca en optimizar la toma de decisiones sobre estrategias de precios y selección de stock mediante el análisis de competitividad por categoría. También se busca entender como los descuentos agresivos afectan la percepción de calidad y que categorías de productos presentan las mejores oportunidades de crecimiento en el mercado indio.
+
+# 2. Descripción del Dataset
+
+- **Archivo:** `amazon.csv`
+- **Filas:** 1.465 productos
+- **Columnas:** 16
+- **Fuente:** Kaggle (Amazon India Sales).
+- **Variables principales:** Precios (actual/descuento), Ratings y Categorías.
+- **Estado Inicial:** Se detectaron datos crudos no normalizados, específicamente caracteres especiales en campos de moneda, jerarquías de texto anidadas en categorías y errores de formato decimal en las calificaciones.
+- **Limitación:** Al no contar con fechas de transacciones ni datos de ubicación, el análisis es de carácter descriptivo-estático sobre el catálogo.
+
+<Figure
+  src={img01}
+  alt="Vista inicial del dataset crudo amazon.csv"
+  caption="Muestra inicial del dataset amazon.csv previo a la limpieza en Power Query."
+/>
+
+# 3. Diccionario de Datos
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Campo</th>
+        <th>Descripción</th>
+        <th>Tipo de Dato</th>
+        <th>Transformación Realizada</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>product_id</strong></td>
+        <td>Identificador único del producto en Amazon.</td>
+        <td>Texto/ID</td>
+        <td>Ninguna.</td>
+      </tr>
+      <tr>
+        <td><strong>category_1...5</strong></td>
+        <td>Jerarquía de categorías (Nivel 1 al 5).</td>
+        <td>Categórico</td>
+        <td>Se expandió desde la columna original mediante delimitador "|".</td>
+      </tr>
+      <tr>
+        <td><strong>discounted_price</strong></td>
+        <td>Precio final de venta tras aplicar descuentos.</td>
+        <td>Numérico</td>
+        <td>Eliminación de símbolo "₹" y conversión a moneda/decimal.</td>
+      </tr>
+      <tr>
+        <td><strong>actual_price</strong></td>
+        <td>Precio de lista original sin ofertas.</td>
+        <td>Numérico</td>
+        <td>Eliminación de símbolo "₹" y conversión a moneda/decimal.</td>
+      </tr>
+      <tr>
+        <td><strong>discount_percentage</strong></td>
+        <td>Porcentaje de rebaja respecto al precio actual.</td>
+        <td>Porcentaje</td>
+        <td>Normalización de formato.</td>
+      </tr>
+      <tr>
+        <td><strong>rating</strong></td>
+        <td>Calificación promedio otorgada por usuarios (1-5).</td>
+        <td>Numérico</td>
+        <td>Corrección de escala y manejo de valores no numéricos.</td>
+      </tr>
+      <tr>
+        <td><strong>rating_count</strong></td>
+        <td>Cantidad total de usuarios que calificaron.</td>
+        <td>Entero</td>
+        <td>Eliminación de comas y manejo de valores nulos.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+# 4. Preprocesamiento/ETL del Dataset
+
+<Figure
+  src={img02}
+  alt="Pipeline de transformación ETL en Power Query"
+  caption="Pasos aplicados en Power Query para normalización, limpieza y creación de variables derivadas."
+/>
+
+## 4.1 Hallazgos Técnicos:
+
+<Callout>
+  <ul>
+    <li><strong>Símbolos de Moneda:</strong> Presencia de "₹" y comas en columnas de precio que impedían cálculos matemáticos.</li>
+    <li><strong>Errores de Escala:</strong> Ratings expresados como números enteros (ej. 42) en lugar de decimales (4.2).</li>
+    <li><strong>Datos Anidados:</strong> Categorías agrupadas en una sola cadena de texto separadas por "|", lo que dificultaba la segmentación.</li>
+    <li><strong>Presencia de columnas sin valor operativo</strong></li>
+    <li><strong>El dataset no tenía registros duplicados</strong></li>
+  </ul>
+</Callout>
+
+## 4.2 Cambios Importantes:
+
+- **Desagregación de categorías:** Se desglosó la jerarquía original en 5 niveles mediante Power Query, permitiendo un análisis granular por subsegmentos.
+- **Normalización de precios:** Se eliminaron caracteres especiales (₹) y se realizó un *casting* a formato numérico, habilitando el cálculo de métricas y análisis estadístico.
+- **Reducción de Ruido en el Dataset:** Para optimizar el rendimiento del procesamiento y mejorar la claridad del modelo de datos, se procedió a la eliminación de columnas con ausencia de registros significativos para el análisis.
+- **Creación de variables de segmentación:** Se derivaron dos columnas calculadas a partir de variables existentes para habilitar análisis agrupados. `price_segment` clasifica cada producto en 5 niveles de precio (Barato, Económico, Rango Medio, Premium, Lujo) en base al `actual_price`, mientras que `discount_bucket` agrupa el `discount_percentage` en rangos del 20%. Ambas variables son de tipo categórico-ordinal y fueron construidas mediante lógica condicional anidada directamente en la tabla de datos.
+
+# 5. Análisis Exploratorio y Hallazgos
+
+## 5.1 Competitividad por Categoría Principal
+
+**Duda Clave:** *¿Qué categorías tienen los descuentos más agresivos y cuál es el diferencial real de precio?*
+
+<Figure
+  src={img03}
+  alt="Gráfico de precios promedio y descuentos por categoría principal"
+/>
+
+<Callout>
+  <p class="callout-title">Análisis de Precios y Descuentos por Categoría</p>
+  <p><span class="insight-label">Contexto</span>Se compararon los precios promedio originales, precios con descuento y porcentaje de descuento aplicado en las 4 categorías principales del catálogo de Amazon India.</p>
+  <p><span class="insight-label">Hallazgo</span><strong><code>Electronics</code></strong> concentra los precios absolutos más altos (₹10.127 promedio), pero es <strong><code>Computers&amp;Accessories</code></strong> quien lidera en agresividad de descuento con un 54% promedio. <strong><code>OfficeProducts</code></strong> presenta la estrategia opuesta: precios bajos con apenas un 12.4% de descuento.</p>
+  <p><span class="insight-label">Implicación</span><strong><code>Computers&amp;Accessories</code></strong> opera con una estrategia de penetración agresiva basada en descuentos, posiblemente para competir en un mercado de commodities (cables, accesorios). <strong><code>Electronics</code></strong> en cambio justifica su precio por el valor percibido del producto. Esto sugiere que no existe una política de descuentos uniforme — cada categoría responde a una dinámica competitiva distinta.</p>
+</Callout>
+
+---
+
+## 5.2 Brecha de Satisfacción por Categoría Nivel 2
+
+**Duda Clave:** *¿Qué subcategorías tienen mejor y peor percepción de calidad según los usuarios?*
+
+<Figure
+  src={img04}
+  alt="Top 8 subcategorías con mayor presencia en el catálogo"
+/>
+
+<Callout>
+  <p class="callout-title">TOP 8 Subcategorías con Mayor Presencia en el Catálogo</p>
+  <p><span class="insight-label">Contexto</span>Se midió el rating promedio de las 8 subcategorías con mayor presencia en el catálogo, con el eje ajustado desde 3.0 para visualizar con claridad las diferencias reales entre subcategorías.</p>
+  <p><span class="insight-label">Hallazgo</span><strong><code>ExternalDevices&amp;DataStorage</code></strong> y <strong><code>OfficePaperProducts</code></strong> lideran con 4.3, mientras que <strong><code>Headphones,Earbuds&amp;Accessories</code></strong> cierra el ranking con 3,9. La diferencia entre el primero y el último es de solo 0.4 puntos, lo que indica que las subcategorías dominantes del catálogo son relativamente homogéneas en calidad percibida. Las subcategorías de tecnología periférica (networking, accesorios) dominan el rango alto.</p>
+  <p><span class="insight-label">Implicación</span>Las categorías de hogar muestran una brecha de satisfacción consistente respecto a las de tecnología, lo que puede indicar problemas de calidad de producto, expectativas no cumplidas o mayor competencia en ese segmento. Priorizar la curación de stock en <strong><code>Kitchen&amp;HomeAppliances</code></strong> y <strong><code>Heating</code></strong> podría impactar directamente en la percepción general de la plataforma.</p>
+</Callout>
+
+<Figure
+  src={img05}
+  alt="Peores 5 subcategorías por rating promedio"
+/>
+
+<Callout>
+  <p class="callout-title">Peores 5 Subcategorías por Rating Promedio</p>
+  <p><span class="insight-label">Contexto</span>Se identificaron las 5 subcategorías con menor rating promedio del catálogo para detectar las zonas de mayor insatisfacción del cliente y contrastarlas con el resto del mercado.</p>
+  <p><span class="insight-label">Hallazgo</span><strong><code>HomeStorage&amp;Organization</code></strong> es la subcategoría con peor desempeño (3.1), seguida por <strong><code>Kitchen&amp;HomeAppliances</code></strong> y <strong><code>Heating,Cooling&amp;AirQuality</code></strong> (ambas en 3.6). Llama la atención que <strong><code>WearableTechnology</code></strong> y <strong><code>Headphones</code></strong> también aparecen en este ranking con 4.0 — lo que sugiere que son pocas las categorías con muy bajo desempeño.</p>
+  <p><span class="insight-label">Implicación</span>El patrón es claro, los productos de hogar concentran la mayor insatisfacción del catálogo. <strong><code>HomeStorage&amp;Organization</code></strong> con 3.1 está por debajo del umbral de 3.5 que generalmente se considera crítico en plataformas de e-commerce. Esto representa una señal de alerta para revisión de proveedores o criterios de selección de stock en esa subcategoría específica.</p>
+</Callout>
+
+> **Se filtraron las subcategorías, asegurando que representen un volumen crítico de productos para evitar sesgos por valores atípicos.**
+
+---
+
+## 5.3 Impacto del Descuento en la Percepción de Calidad
+
+**Duda clave:** *¿Los descuentos agresivos perjudican la percepción de calidad?*
+
+<Figure
+  src={img06}
+  alt="Relación entre rango de descuento y calidad percibida (rating promedio)"
+/>
+
+<Callout>
+  <p class="callout-title">¿A mayor descuento, menor calidad percibida?</p>
+  <p><span class="insight-label">Contexto</span>Se agruparon los 1.464 productos en 5 rangos de descuento para analizar si existe una relación entre la agresividad del descuento aplicado y la satisfacción del cliente expresada en el rating promedio.</p>
+  <p><span class="insight-label">Hallazgo</span>La línea de rating se mantiene prácticamente plana entre 3.9 y 4.1 en todos los rangos de descuento, sin una tendencia clara de caída. El rango 40-60% concentra la mayor cantidad de productos (500+) y no muestra el rating más bajo — ese corresponde al rango 20-40% con 3.9. La correlación entre descuento y rating es estadísticamente insignificante.</p>
+  <p><span class="insight-label">Implicación</span>Los descuentos agresivos no destruyen la percepción de calidad del producto. Esto le da respaldo al negocio para implementar estrategias de pricing dinámico sin temor a deteriorar la reputación de los productos. El cliente de Amazon India evalúa la calidad del producto independientemente del precio que pagó por él.</p>
+</Callout>
+
+---
+
+## 5.4 Análisis de Posicionamiento y Segmentación de Mercado
+
+**Duda Clave:** *¿Cuál es el perfil socioeconómico predominante al que responde la oferta actual del catálogo?*
+
+<Figure
+  src={img07}
+  alt="Distribución de productos por segmento de precio"
+/>
+
+<Callout>
+  <p class="callout-title">Distribución por Segmento de Precio</p>
+  <p><span class="insight-label">Contexto</span>Se clasificaron los 1.464 productos en 5 segmentos de precio (Barato, Económico, Rango-Medio, Premium y Lujo) para entender hacia qué perfil de consumidor está orientado el catálogo de Amazon India.</p>
+  <p><span class="insight-label">Hallazgo</span>El segmento Económico concentra la mayor porción del catálogo con un 33%, seguido del Rango-Medio con 30%. Juntos representan casi 2 de cada 3 productos disponibles. En el extremo opuesto, Lujo y Premium suman apenas el 22%, confirmando que la oferta está fuertemente sesgada hacia el consumidor de poder adquisitivo medio-bajo.</p>
+  <p><span class="insight-label">Implicación</span>Esta distribución es consistente con el perfil predominante del mercado indio de e-commerce, donde la sensibilidad al precio es alta y el volumen de ventas se sostiene en tickets bajos. Para una estrategia de crecimiento, ampliar el segmento Premium con productos bien valorados podría capturar un nicho con mayor margen y menor competencia por precio — especialmente considerando que los productos Lujo muestran el mejor rating promedio del catálogo (4.09).</p>
+</Callout>
+
+---
+
+# 6. Dashboard Y Conclusión
+
+## 6.1 Dashboard
+
+El dashboard consolida los hallazgos del análisis en una vista única e interactiva, organizada en tres niveles de lectura. En la parte superior, cinco KPIs resumen el estado general del catálogo. Debajo, cinco visualizaciones desarrolladas en Excel permiten explorar las dimensiones de precio, descuento, satisfacción y segmentación de mercado el cual se puede filtrar por categorías de manera dinámica con botones.
+
+<Figure
+  src={img08}
+  alt="Dashboard ejecutivo en Excel - KPIs y panel superior"
+  caption="Vista superior del dashboard interactivo en Excel con KPIs generales y segmentadores dinámicos."
+/>
+
+<Figure
+  src={img09}
+  alt="Dashboard ejecutivo en Excel - Visualizaciones analíticas"
+  caption="Vista inferior del dashboard con los cinco gráficos interactivos de precio, descuento, rating y segmentación."
+/>
+
+## 6.2 Conclusiones
+
+El análisis del catálogo de Amazon India revela tres patrones estructurales que deberían orientar las decisiones de negocio:
+
+- **Resiliencia de Marca:** Se desmitifica la idea de que el descuento afecta la percepción de calidad. El consumidor indio es pragmático; valora el ahorro sin penalizar la nota del producto, lo que permite mayor flexibilidad en campañas de liquidación de stock.
+- **Oportunidad en el Segmento Premium:** Aunque el catálogo es predominantemente económico, el segmento **Premium** y de **Lujo** presentan los mejores ratings. Existe un nicho de mercado dispuesto a pagar más por calidad comprobada que actualmente está subrepresentado en volumen.
+- **Alerta en Hogar y Cocina:** Las subcategorías de **`Home & Kitchen`** requieren una auditoría urgente de proveedores. Al ser las áreas con mayor insatisfacción (ratings &lt; 3.5), representan el mayor riesgo de fuga de clientes y devoluciones.

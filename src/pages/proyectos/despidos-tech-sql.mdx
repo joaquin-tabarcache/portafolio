@@ -1,0 +1,291 @@
+---
+layout: ../../layouts/ProjectLayout.astro
+number: "05"
+title: "Auditoría, Limpieza (Data Cleaning) y EDA en SQL: Despidos en Tech"
+description: "Auditoría, depuración y análisis exploratorio de datos (EDA) en MySQL sobre un dataset global de despidos tecnológicos usando Staging Tables, Self-Joins, CTEs y Window Functions."
+stack: ["MySQL", "Data Wrangling", "Window Functions", "CTEs", "EDA"]
+meta:
+  - label: "Motor SQL"
+    value: "MySQL"
+  - label: "Técnicas"
+    value: "CTEs · Window Functions · Self-Join"
+  - label: "Fases"
+    value: "Data Cleaning + EDA"
+  - label: "Dataset"
+    value: "Global Tech Layoffs (CSV)"
+prev:
+  title: "Data Cleaning & Business Intelligence: Caso Amazon India"
+  href: "/proyectos/caso-amazon-india"
+---
+
+import Figure from '../../components/Figure.astro';
+import ImageGrid from '../../components/ImageGrid.astro';
+
+import img01 from '../../assets/images/despidos-sql/01-ingesta-1.png';
+import img02 from '../../assets/images/despidos-sql/02-ingesta-2.png';
+import img03 from '../../assets/images/despidos-sql/03-duplicados.png';
+import img04 from '../../assets/images/despidos-sql/04-trim.png';
+import img05 from '../../assets/images/despidos-sql/05-update-industry.png';
+import img06 from '../../assets/images/despidos-sql/06-crypto-1.png';
+import img07 from '../../assets/images/despidos-sql/07-crypto-2.png';
+import img08 from '../../assets/images/despidos-sql/08-country-1.png';
+import img09 from '../../assets/images/despidos-sql/09-country-2.png';
+import img10 from '../../assets/images/despidos-sql/10-fecha-1.png';
+import img11 from '../../assets/images/despidos-sql/11-fecha-2.png';
+import img12 from '../../assets/images/despidos-sql/12-fecha-3.png';
+import img13 from '../../assets/images/despidos-sql/13-nulls-explore.png';
+import img14 from '../../assets/images/despidos-sql/14-nulls-blanks.png';
+import img15 from '../../assets/images/despidos-sql/15-nulls-selfjoin.png';
+import img16 from '../../assets/images/despidos-sql/16-delete-rows.png';
+import img17 from '../../assets/images/despidos-sql/17-drop-column.png';
+import img18 from '../../assets/images/despidos-sql/18-resultado-cleaning.png';
+import img19 from '../../assets/images/despidos-sql/19-eda-basico-1.png';
+import img20 from '../../assets/images/despidos-sql/20-eda-basico-2.png';
+import img21 from '../../assets/images/despidos-sql/21-eda-basico-3.png';
+import img22 from '../../assets/images/despidos-sql/22-eda-basico-4.png';
+import img23 from '../../assets/images/despidos-sql/23-eda-groupby-1.png';
+import img24 from '../../assets/images/despidos-sql/24-eda-groupby-2.png';
+import img25 from '../../assets/images/despidos-sql/25-eda-rolling.png';
+import img26 from '../../assets/images/despidos-sql/26-eda-ranking-1.png';
+import img27 from '../../assets/images/despidos-sql/27-eda-ranking-2.png';
+
+Primero voy a crear una base de datos para trabajar con el dataset, lo cual sirve principalmente para **almacenar, estructurar y manipular información de manera segura.**
+
+Además permite tomar archivos planos y sin procesar (como un archivo CSV) e importarlos convirtiéndolos en tablas formales.
+
+# 0. Ingesta de Datos y Entorno de Trabajo
+
+El proyecto parte de un dataset crudo en formato plano (`.csv`) con registros globales de despidos en empresas tecnológicas. Para garantizar la integridad de los datos originales, se estructuró un esquema relacional en **MySQL** importando los registros en bruto hacia una tabla base (`layoffs`) y generando inmediatamente una tabla de preparación (**Staging Table**: `layoffs_staging`) sobre la cual ejecutar las operaciones destructivas de limpieza y normalización.
+
+<Figure
+  src={img01}
+  alt="Creación de tabla staging e ingesta inicial en MySQL"
+/>
+
+<Figure
+  src={img02}
+  alt="Vista de registros importados en la tabla base layoffs"
+/>
+
+---
+
+# 1. Eliminar Duplicados
+
+**Detección algorítmica sin Primary Key:** Dado que el dataset carece de un identificador único (ID), implementé una **CTE** combinada con la función de ventana para evaluar la unicidad de cada registro contra la totalidad de sus atributos.
+
+**Eliminación física en MySQL:** Como el motor de MySQL restringe las sentencias `DELETE` directas sobre CTEs derivados, diseñé una tabla auxiliar (`layoffs_staging2`) materializando el cálculo en la columna física `ROW_NUM`, ejecutando luego la depuración de todos los registros con `ROW_NUM > 1`.
+
+<Figure
+  src={img03}
+  alt="Detección y eliminación de registros duplicados con ROW_NUMBER y tabla auxiliar"
+/>
+
+---
+
+# 2. Estandarizar la Data
+
+La estandarización de los datos es el segundo paso en el proceso de limpieza y consiste en **encontrar problemas o inconsistencias en los registros** (como errores de ortografía o de formato) y corregirlos para que todo sea uniforme.
+
+- **Depuración de cadenas (`TRIM`):** Eliminación de espacios residuales iniciales y finales en los nombres de las compañías.
+
+<Figure
+  src={img04}
+  alt="Limpieza de espacios con TRIM en nombres de compañías"
+/>
+
+- **Consolidación de categorías (`UPDATE`):** Unificación semántica de etiquetas fragmentadas en la columna `industry` (por ejemplo, consolidando variantes como *"Crypto"*, *"Cryptocurrency"* y *"Crypto Currency"* bajo un único estándar `"Crypto"`).
+
+<Figure
+  src={img05}
+  alt="Actualización de categorías de industria fragmentadas con UPDATE"
+/>
+
+<ImageGrid>
+  <Figure
+    src={img06}
+    alt="Inspección de variantes de industria Crypto antes de normalizar"
+    compact
+  />
+  <Figure
+    src={img07}
+    alt="Resultado de industria Crypto unificada"
+    compact
+  />
+</ImageGrid>
+
+- **Saneamiento de caracteres (`TRIM(TRAILING '.' FROM...)`):** Corrección de inconsistencias tipográficas en códigos de país, eliminando puntuaciones erróneas como `"United States."`.
+
+<ImageGrid>
+  <Figure
+    src={img08}
+    alt="Detección de inconsistencias tipográficas en la columna country"
+    compact
+  />
+  <Figure
+    src={img09}
+    alt="Consulta de saneamiento de caracteres con TRIM TRAILING"
+    compact
+  />
+</ImageGrid>
+
+- **Estandarización y formato de fechas (`STR_TO_DATE` & `ALTER TABLE`):** La columna de fechas se importó inicialmente como simple texto, lo cual impide realizar análisis de tiempo. Para arreglarlo, utiliza la función `STR_TO_DATE` para indicarle a MySQL la estructura del texto original (mes, día, año) y convertirla al formato estándar de fecha de la base de datos. Una vez convertido el formato, modifiqué el tipo de dato de la columna para que oficialmente sea reconocida como `DATE`.
+
+<ImageGrid>
+  <Figure
+    src={img10}
+    alt="Conversión de fechas de texto a formato estándar con STR_TO_DATE y ALTER TABLE"
+    compact
+  />
+  <div class="space-y-4">
+    <Figure
+      src={img11}
+      alt="Verificación de formato de fechas estandarizado"
+      compact
+    />
+    <Figure
+      src={img12}
+      alt="Esquema actualizado de la columna date como tipo DATE"
+      compact
+    />
+  </div>
+</ImageGrid>
+
+# 3. Arreglar valores “Nulls” o “Blanks”
+
+El tercer paso del proceso de limpieza de datos consiste en lidiar con las celdas que contienen valores nulos (NULL) o que están en blanco.
+
+1. **EXPLORAR LOS DATOS FALTANTES:** Primero, realizo una consulta para aislar y visualizar exactamente cuántas filas tienen la columna de industria en blanco o como valor nulo.
+
+<Figure
+  src={img13}
+  alt="Consulta exploratoria de valores NULL y en blanco en industry"
+/>
+
+2. **CONVERTIR LOS ESPACIOS EN BLANCO A NULL:** MySQL tiene problemas para procesar la lógica cuando hay una mezcla de valores verdaderamente nulos (NULL) y celdas simplemente en blanco (''). Para solucionar este problema, la mejor práctica es **estandarizar todos los espacios en blanco transformándolos en NULL**.
+
+<Figure
+  src={img14}
+  alt="Transformación de cadenas vacías a NULL en MySQL"
+/>
+
+3. **POBLAR LOS DATOS USANDO UN SELF JOIN:** Ahora que todos los datos faltantes son NULL, la lógica es nombrar a la misma tabla de dos formas distintas: t1 (la fila a la que le falta el dato) y t2 (la fila que sí tiene el dato). Uno ambas tablas asegurándose de que el nombre de la empresa y la ubicación coincidan, y finalmente le indico a SQL que reemplace el valor nulo de t1 con el valor correcto de t2.
+
+<Figure
+  src={img15}
+  alt="Imputación de valores faltantes mediante Self Join en SQL"
+/>
+
+---
+
+# 4. Eliminar columnas y filas innecesarias
+
+1. **ELIMINAR FILAS SIN DATOS ÚTILES:** Identifiqué registros donde el total de empleados despedidos y el porcentaje de despidos estaban ausentes (valores nulos). Debido a que estas métricas eran esenciales para el posterior **análisis exploratorio de datos (EDA)**, se eliminaron dichas filas mediante una consulta **DELETE**, ya que no aportaban información útil para el análisis.
+
+<Figure
+  src={img16}
+  alt="Eliminación de filas sin métricas de despidos mediante DELETE"
+/>
+
+2. **ELIMINAR COLUMNAS INNECESARIAS:** A lo largo de la limpieza, se había creado la columna extra `ROW_NUM` (en el primer paso) con el único fin de poder identificar y borrar las filas duplicadas. Dado que los duplicados ya fueron eliminados, esta columna cumplió su propósito y mantenerla solo la hace redundante, ocupando memoria y espacio de almacenamiento de forma innecesaria. Así que lo mejor es eliminarla de la tabla.
+
+<Figure
+  src={img17}
+  alt="Eliminación de columna auxiliar ROW_NUM con ALTER TABLE DROP COLUMN"
+/>
+
+Con la eliminación de esta columna, concluye oficialmente el proyecto de limpieza de datos.
+
+---
+
+# 5. Resultado del Data Cleaning
+
+Como resultado del proceso de limpieza de datos, del datase con el que trabajé, obtuve una **tabla depurada y estructurada**, libre de duplicados, errores e inconsistencias, con registros únicos y datos confiables, lista para ser utilizada en análisis exploratorio de datos (EDA).
+
+<Figure
+  src={img18}
+  alt="Tabla depurada y estructurada lista para análisis exploratorio"
+/>
+
+# 6. Exploratory Data Analysis
+
+1. El análisis comenzó con una **exploración básica de los datos**, utilizando funciones como `MAX()` y `MIN()` para identificar **valores extremos y comprender los límites del dataset**. Se analizaron el **máximo número de empleados despedidos en un evento**, el **porcentaje máximo de despidos** para detectar empresas que despidieron al 100% de su plantilla, y el **rango temporal del dataset** mediante `MIN(date)` y `MAX(date)`.
+
+<ImageGrid>
+  <Figure
+    src={img19}
+    alt="Consultas exploratorias básicas con MAX y MIN en MySQL"
+    compact
+  />
+  <div class="space-y-4">
+    <Figure
+      src={img20}
+      alt="Resultado de valores máximos de despidos"
+      compact
+    />
+    <Figure
+      src={img21}
+      alt="Resultado de rango temporal mínimo y máximo del dataset"
+      compact
+    />
+    <Figure
+      src={img22}
+      alt="Empresas con 100% de plantilla despedida"
+      compact
+    />
+  </div>
+</ImageGrid>
+
+**Hallazgos clave de esta exploración:**
+
+- **Concentración en Big Tech (Acumulado histórico):** Al agrupar el total de recortes por empresa (`SUM(total_laid_off)`), **Amazon** lidera el ranking global con **18.150 despidos** acumulados en múltiples rondas, seguida por **Google (12.000)**, **Meta (11.000)**, **Salesforce (10.090)**, **Microsoft (10.000)** y **Philips (10.000)**.
+- **Pico máximo en un solo evento:** El récord de mayor recorte ejecutado en una única fecha fue de **12.000 empleados** (correspondiente al ajuste de plantilla de Google).
+- **Cierres definitivos (`percentage_laid_off = 1`):** El valor `1` (100% de la plantilla despedida) confirma la quiebra o cese total de operaciones de múltiples compañías.
+
+2. Usé **agrupaciones con `GROUP BY` combinadas con `SUM()` y `ORDER BY`** para identificar tendencias y concentraciones en los datos. Esto me permitió analizar qué empresas, industrias y países registraron más despidos, así como calcular totales acumulados por año y por etapa de financiación de las empresas.
+
+<Figure
+  src={img23}
+  alt="Consultas de segmentación con GROUP BY, SUM y ORDER BY"
+/>
+
+<Figure
+  src={img24}
+  alt="Resultados agrupados por industria, país, año y etapa de financiación"
+/>
+
+**Hallazgos clave de la segmentación:**
+
+- **Sectores más golpeados:** **Consumer (45.182)** y **Retail (43.613)** lideran el volumen de recortes, seguidos por **Transportation (33.748)** y **Finance (28.344)**. Esto demuestra que las empresas tecnológicas atadas al consumo masivo y comercio electrónico sufrieron la mayor contracción post-pandemia.
+- **Concentración geográfica extrema:** **Estados Unidos (256.559 despidos)** concentra por lejos el epicentro del ajuste global, más de 7 veces por encima del segundo país, **India (35.993)**, seguido por **Países Bajos (17.220)**, **Suecia (11.264)** y **Brasil (10.391)**.
+- **Aceleración anual alarmante:** Tras el golpe inicial del COVID en **2020 (80.998)** y un **2021 de bonanza (apenas 15.823 despidos)**, el mercado colapsó en **2022 (160.661)**. Lo más crítico: <span class="rounded bg-crimson-bg px-1.5 py-0.5 font-semibold text-crimson">en 2023 se registraron 125.677 despidos en tan solo los primeros 3 meses del año</span> (casi alcanzando todo el 2022 en un solo trimestre).
+- **Madurez de las empresas (`Stage`):** El grueso masivo proviene de compañías que ya cotizan en bolsa (**Post-IPO con 204.132 despidos**), obligadas por los mercados públicos a recortar costos operativos rápidamente frente a las startups en etapas tempranas (Series B, C y D suman entre 15k y 20k cada una).
+- **Estacionalidad presupuestaria:** Al aislar los meses (`SUBSTRING`), **Enero (`01`) con 92.037 despidos** y **Noviembre (`11`) con 55.758** concentran los picos históricos, coincidiendo directamente con el cierre de año fiscal (Q4) y los ajustes de presupuesto de inicio de año (Q1).
+
+3. Para dimensionar la velocidad de aceleración de la crisis a lo largo del tiempo, se construyó una serie temporal de totales acumulados (*rolling totals*). Mediante una **CTE** (`Rolling_Total`) se consolidó el volumen mensual de despidos (`YYYY-MM`) y posteriormente se aplicó la función de ventana `SUM(total_off) OVER (ORDER BY MONTH)` para calcular la curva acumulada mes a mes:
+
+<Figure
+  src={img25}
+  alt="Cálculo de serie temporal de totales acumulados (Rolling Total) con CTE y Window Function"
+/>
+
+**Hallazgos clave de la curva acumulada:**
+
+- **Fase 1 – Choque inicial de pandemia (Q2 2020):** El registro inicia en marzo de 2020 con **9.628** despidos y escala drásticamente en abril (**26.710**) y mayo (**25.804**), acumulando **62.142** desvinculaciones en apenas un trimestre producto del freno económico inicial.
+- **Fase 2 – Meseta y expansión del sector (Mediados 2020 – Fin 2021):** Entre septiembre de 2020 y diciembre de 2021 la curva prácticamente se aplana (con pisos mínimos como octubre de 2021 con solo **22** despidos registrados). En todo 2021 el acumulado apenas avanza de **80.998** (dic-2020) a **96.821** (dic-2021).
+- **Fase 3 – Punto de inflexión y estallido de la burbuja (Mayo 2022 – Enero 2023):** A partir de mayo de 2022 (**12.885** despidos mensuales) la pendiente se vuelve vertical, superando la barrera de los 100.000 acumulados. El pico de aceleración ocurre entre **noviembre de 2022 (53.451)** y **enero de 2023 (84.714 en un solo mes)**, llevando el acumulado global a **383.159 empleados despedidos** al cierre del corte en marzo de 2023.
+
+4. Se construyeron rankings de empresas con mayor cantidad de despidos por año utilizando **CTEs y funciones de ventana en SQL**. Primero se agruparon los despidos anuales por empresa, y luego se aplicó `DENSE_RANK()` con `PARTITION BY year` para generar un **ranking anual ordenado por cantidad de despidos**. Finalmente, se filtraron los resultados para obtener el **Top 5 de empresas con más despidos en cada año**.
+
+<ImageGrid>
+  <Figure
+    src={img26}
+    alt="Consulta SQL con CTE y DENSE_RANK PARTITION BY year para Top 5 anual"
+    compact
+  />
+  <Figure
+    src={img27}
+    alt="Resultados del Top 5 de empresas con más despidos por año"
+    compact
+  />
+</ImageGrid>
+

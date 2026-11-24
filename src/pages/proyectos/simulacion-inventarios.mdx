@@ -1,0 +1,196 @@
+---
+layout: ../../layouts/ProjectLayout.astro
+number: "01"
+title: "Simulación y Optimización de Políticas de Inventarios en Python"
+description: "Simulador de eventos discretos y optimización en dos etapas para definir reglas óptimas de reposición bajo demanda y tiempos de entrega estocásticos con ventas perdidas."
+stack: ["Python", "NumPy", "SciPy", "Pandas", "Matplotlib", "Seaborn", "pytest"]
+meta:
+  - label: "Contexto"
+    value: "Modelos y Simulación · UCASAL"
+  - label: "Fecha"
+    value: "Noviembre 2026"
+  - label: "Enfoque"
+    value: "Simulación Discreta & Optimización"
+  - label: "Validación"
+    value: "19/19 checks · 10 tests pytest"
+next:
+  title: "Análisis de Estados Financieros 2022–2024 | Power BI"
+  href: "/proyectos/analisis-estados-financieros"
+---
+
+import Figure from '../../components/Figure.astro';
+import Callout from '../../components/Callout.astro';
+
+import imgFlujo from '../../assets/images/simulacion-inventarios/01-flujo-sistema.png';
+import imgCostos from '../../assets/images/simulacion-inventarios/02-composicion-costos.png';
+import imgHeatmap from '../../assets/images/simulacion-inventarios/03-heatmap-optimizacion.png';
+import imgEvolucion from '../../assets/images/simulacion-inventarios/04-evolucion-inventario.png';
+import imgSensibilidad from '../../assets/images/simulacion-inventarios/05-sensibilidad-k-lt.png';
+
+## 1. El problema y la finalidad del proyecto
+
+En distribuidoras mayoristas de equipamiento informático, fijar los pedidos con fórmulas determinísticas clásicas —como el Lote Económico de Pedido (**EOQ**)— suele fallar en la práctica: cuando la demanda diaria y los plazos de transporte fluctúan al mismo tiempo, el depósito sufre quiebres de stock frecuentes y pierde ventas inmediatas frente a otros proveedores.
+
+La finalidad de este proyecto fue construir, verificar y validar un **simulador de eventos discretos en Python** que reproduzca la operación diaria de un depósito regional (NOA) para un SKU de alta rotación (router Wi-Fi 6 `RT-W6-100`) y determine **qué política de reposición minimiza el costo total anual garantizando al menos un 95 % de nivel de servicio (*Fill Rate*)**.
+
+- **Entradas estocásticas:** demanda diaria `Poisson(λ = 8)` unidades/día (~2.920 u/año) y tiempo de entrega discreto `LT ~ U{2, 3, 4, 5}` días, bajo régimen puro de **ventas perdidas** (sin *backorders*).
+- **Estructura de costos:** mantenimiento `h = 0,02 USD/(u·día)` (`7,30 USD/año`), costo fijo por orden `K = 50 USD` y penalización por unidad faltante `p = 30 USD`.
+- **Por qué simular en lugar de usar solo fórmulas analíticas:** en la operación real el pedido se dispara al cierre del día con un salto por debajo del umbral (*undershoot* promedio de ~4 unidades), el stock físico se trunca en cero ante ventas perdidas y la demanda durante el *lead time* forma una mezcla asimétrica no gaussiana.
+
+## 2. Cómo funciona el simulador y diseño experimental
+
+Cada corrida avanza día a día durante **425 días** (60 días de calentamiento o *warm-up* descartados + 365 días de registro estacionario). En cada jornada el motor ejecuta cuatro pasos estrictos: recepción de pedidos en tránsito, atención de la demanda con truncamiento en ventas perdidas, devengamiento de costos diarios y revisión de la posición de inventario (`IP = stock físico + en tránsito`) al cierre para decidir si se emite una orden bajo revisión continua `(s, Q)` o periódica `(R, S)`.
+
+<Figure
+  src={imgFlujo}
+  alt="Diagrama de flujo del motor de simulación por paso diario"
+  caption="Ciclo diario del simulador en Python: recepciones, demanda con ventas perdidas, costeo y disparo de reposición."
+/>
+
+Para comparar las políticas en igualdad exacta de condiciones se aplicaron **Números Aleatorios Comunes (CRN)** con flujos independientes (`numpy.random.SeedSequence`), ejecutando una optimización en grilla en dos etapas sobre semilla `2027` (30 réplicas de exploración global + 100 réplicas de refinamiento fino) y una **evaluación confirmatoria independiente sobre 100 réplicas anuales (`seed = 2026`)**. Antes de experimentar, el motor superó **19 chequeos estructurales**, **10 pruebas unitarias en `pytest`** y reprodujo el óptimo analítico EOQ determinístico (`1.460 USD/año`, ciclo de 25 días) con error `0,000 %`.
+
+El núcleo del bucle diario en `src/simulator.py` concentra toda la transición de estado sin dependencias externas pesadas, lo que permitió correr miles de escenarios anuales en menos de dos minutos:
+
+```python
+for t in range(n_dias):
+    arribo = arr[t]
+    if arribo:
+        inv += arribo
+        en_camino -= arribo
+    ini_t = inv
+
+    dem = dem_l[t]
+    vendido = dem if dem < inv else inv
+    inv -= vendido
+    perdido = dem - vendido
+
+    c_mant[t] = 0.5 * h * (ini_t + inv)
+    if perdido:
+        c_falt[t] = p_falta * perdido
+
+    pedido = 0
+    if es_sq and (inv + en_camino <= s):
+        pedido = Q
+    elif (not es_sq) and ((t + 1) % R == 0):
+        pedido = max(0, S - (inv + en_camino))
+
+    if pedido > 0:
+        lt = lts_l[idx_lt]
+        idx_lt += 1
+        arr[t + lt + 1] += pedido
+        en_camino += pedido
+        c_ord[t] = K
+```
+
+## 3. Comparación de políticas y resultados clave
+
+Se contrastaron cuatro escenarios representativos sobre las 100 réplicas confirmatorias independientes: la regla EOQ sin stock de seguridad (`E1_Base`), la heurística analítica normal con `z = 1,645` (`E2_Conservador`), el óptimo continuo encontrado por simulación (`E3_Optimizado`) y la mejor política de revisión periódica (`E4_Periodico`).
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Escenario</th>
+        <th>Parámetros</th>
+        <th>Costo total (USD/año)</th>
+        <th>Faltantes (USD/año)</th>
+        <th>Fill Rate (%)</th>
+        <th>CSL (%)</th>
+        <th>Días quiebre / año</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>E1_Base</strong></td>
+        <td><code>s=28, Q=200</code></td>
+        <td>4.167,91 ± 195,59</td>
+        <td>2.733,60</td>
+        <td>96,88 %</td>
+        <td>43,66 %</td>
+        <td>14,76</td>
+      </tr>
+      <tr>
+        <td><strong>E2_Conservador</strong></td>
+        <td><code>s=45, Q=200</code></td>
+        <td>1.825,06 ± 52,26</td>
+        <td>262,20</td>
+        <td>99,70 %</td>
+        <td>88,66 %</td>
+        <td>1,85</td>
+      </tr>
+      <tr>
+        <td><strong>E3_Optimizado</strong></td>
+        <td><code>s*=53, Q*=220</code></td>
+        <td><strong>1.664,24 ± 23,34</strong></td>
+        <td><strong>46,20</strong></td>
+        <td><strong>99,95 %</strong></td>
+        <td><strong>97,00 %</strong></td>
+        <td><strong>0,39</strong></td>
+      </tr>
+      <tr>
+        <td><strong>E4_Periodico</strong></td>
+        <td><code>R*=24, S*=254</code></td>
+        <td>1.765,47 ± 24,31</td>
+        <td>61,80</td>
+        <td>99,93 %</td>
+        <td>97,71 %</td>
+        <td>0,42</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<Figure
+  src={imgCostos}
+  alt="Composición del costo anual promedio por escenario con intervalos de confianza del 95 %"
+  caption="Sin stock de seguridad (E1), las penalizaciones por ventas perdidas explican el 65,6 % del costo anual. La política optimizada E3 reduce el costo a 1.664 USD/año con mínima dispersión."
+/>
+
+<Figure
+  src={imgHeatmap}
+  alt="Superficie de costo total en el plano (s, Q) en etapa de exploración global y refinamiento fino"
+  caption="Optimización en dos etapas: la búsqueda fina identifica una meseta cuasi-óptima plana alrededor de (s*=53, Q*=220), desplazada respecto a la heurística analítica (45, 200)."
+/>
+
+<Callout>
+  <p class="callout-title">Impacto económico y estadístico de la política optimizada</p>
+  <p>
+    <span class="insight-label">Hallazgo principal</span>
+    Operar con <strong><code>(s* = 53, Q* = 220)</code></strong> reduce el costo anual esperado en un <strong>60,1 %</strong> frente a la línea base EOQ (-2.503,68 USD/año) y en un <strong>8,8 %</strong> frente a la heurística analítica conservadora (-160,83 USD/año), llevando las ventas perdidas de 91,1 a apenas 1,5 unidades por año y elevando el <em>Cycle Service Level</em> del 43,7 % al 97,0 %.
+  </p>
+  <p>
+    <span class="insight-label">Validación estadística</span>
+    Las diferencias fueron contrastadas mediante pruebas <em>t</em> pareadas y Wilcoxon no paramétricas sobre 100 réplicas CRN, resultando altamente significativas en todos los pares (<code>p = 5,10 × 10⁻⁴⁵</code> vs. E1; <code>p = 1,37 × 10⁻⁷</code> vs. E2; <code>p = 1,74 × 10⁻⁷</code> vs. E4).
+  </p>
+  <p>
+    <span class="insight-label">Implicación operativa</span>
+    El <em>Fill Rate</em> por sí solo engaña: en <code>E1_Base</code> luce aceptable (96,88 %), pero oculta quiebres en más de la mitad de los ciclos de reposición (<code>CSL = 43,66 %</code>). Evaluar ambos indicadores en conjunto evita subestimar el impacto comercial real.
+  </p>
+</Callout>
+
+## 4. Dinámica diaria y análisis de sensibilidad
+
+Para entender visualmente por qué la fórmula analítica (`s = 45`) todavía sufre quiebres, el seguimiento diario muestra que cuando la posición de inventario cruza el umbral al cierre (con un *undershoot* real de ~4 unidades) y coincide con un envío de 4 o 5 días más picos de demanda, el stock físico llega a cero antes del arribo del camión.
+
+<Figure
+  src={imgEvolucion}
+  alt="Evolución diaria del inventario físico y posición de inventario bajo E2_Conservador"
+  caption="Traza anual de ejemplo en E2 (s=45, Q=200): el panel inferior muestra el disparo por posición de inventario; el superior evidencia cómo el stock físico toca cero durante demoras largas."
+/>
+
+El análisis de sensibilidad reveló además cuál es el factor de riesgo dominante: el **74,1 % de la varianza de la demanda durante la reposición** proviene de la incertidumbre del transporte y no de la demanda diaria. Mientras que variar la penalización `p` entre 10 y 60 USD/u apenas mueve el costo óptimo (&lt; 2,6 %) y mantiene estable `Q* = 220`, aumentar la dispersión del flete hacia una distribución de cola pesada (Gamma discreta con la misma media de 3,5 días) dispara el punto de reorden óptimo de **52 a 82 unidades** (+321 USD/año frente a un proveedor estable).
+
+<Figure
+  src={imgSensibilidad}
+  alt="Sensibilidad del lote óptimo Q* frente al costo fijo K y del punto de reorden s* frente a la dispersión del lead time"
+  caption="Izquierda: respuesta de Q* al costo fijo de orden K y brecha de la revisión periódica. Derecha: impacto no lineal de la variabilidad del tiempo de entrega sobre el punto de reorden s*."
+/>
+
+## 5. Herramientas y recomendación operativa
+
+- **Herramientas utilizadas:** **Python** para el modelado modular, **NumPy** (`SeedSequence` y arreglos numéricos), **SciPy** (pruebas *t* pareadas, Wilcoxon y bondad de ajuste), **Pandas** (consolidación de tablas y grillas), **Matplotlib / Seaborn** (visualizaciones a 300 DPI), **pytest** (pruebas unitarias automatizadas) y **Jupyter Notebook** para la reproducibilidad completa.
+
+**Recomendación práctica resultante:**
+
+- **Si el depósito opera con control diario por ERP:** adoptar la política continua **`(s* = 53, Q* = 220)`** (dentro de una meseta estable `s ∈ [51, 56]`, `Q ∈ [200, 230]`), logrando el menor costo (`1.664 USD/año`) y el 72 % de los años con cero quiebres.
+- **Si conviene consolidar fletes en fechas fijas:** la política periódica **`(R* = 24 días, S* = 254)`** —o **`(R = 28, S = 288)`** en calendario mensual— cuesta solo `+6,1 %` más (`+101 USD/año`, equivalente a `6,75 USD/orden`), pasando a ser preferible si la consolidación logística ahorra más que ese umbral por despacho.

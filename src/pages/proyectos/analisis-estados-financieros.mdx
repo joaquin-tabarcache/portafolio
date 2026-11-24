@@ -1,0 +1,127 @@
+---
+layout: ../../layouts/ProjectLayout.astro
+number: "02"
+title: "Análisis de Estados Financieros 2022–2024 | Power BI"
+description: "Solución de Business Intelligence diseñada para auditar la estructura patrimonial, solvencia y liquidez de InfoEstrategias S.A. durante el trienio 2022–2024."
+stack: ["Power BI", "DAX", "Power Query (M)", "Modelado de Datos", "Finanzas"]
+meta:
+  - label: "Empresa analizada"
+    value: "InfoEstrategias S.A."
+  - label: "Período"
+    value: "2022 – 2024"
+  - label: "Rol"
+    value: "Analista de BI"
+  - label: "Origen de datos"
+    value: "Estados contables (Excel)"
+prev:
+  title: "Simulación y Optimización de Políticas de Inventarios en Python"
+  href: "/proyectos/simulacion-inventarios"
+next:
+  title: "Dashboards ejecutivos para un ERP: ventas, stock y compras en tiempo real"
+  href: "/proyectos/erp-novamarket"
+---
+
+import Figure from '../../components/Figure.astro';
+import imgDax from '../../assets/images/estados-financieros/01-dax.png';
+import imgEsf from '../../assets/images/estados-financieros/02-esf.png';
+import imgRatios from '../../assets/images/estados-financieros/03-ratios.png';
+import imgHorizontal from '../../assets/images/estados-financieros/04-horizontal.png';
+
+## Resumen Ejecutivo
+
+Solución de Business Intelligence diseñada para auditar la estructura patrimonial, solvencia y liquidez de *InfoEstrategias S.A.* durante el trienio 2022–2024. El tablero integra tres niveles de análisis: composición del Balance General (ESF), monitoreo de ratios financieros frente a umbrales de referencia y análisis horizontal de variaciones interanuales (YoY).
+
+## Herramientas
+
+Power BI Desktop | Power Query (M) | DAX | Excel (origen de datos)
+
+## Arquitectura de Datos y ETL (Power Query)
+
+A partir de reportes contables crudos en formato matricial (ancho), diseñé un flujo de transformación en lenguaje M para estructurar un modelo analítico tabular:
+
+- **Filtrado de alcance:** Aislamiento de las cuentas patrimoniales del Estado de Situación Financiera, separándolas del Estado de Resultados.
+- **Normalización (Unpivot):** Transposición de las columnas temporales para convertir la matriz contable en una tabla de hechos transaccional en formato largo (*Cuenta, Año, Valor*) de 69 registros.
+- **Jerarquización contable:** Creación de lógica condicional para clasificar dinámicamente cada línea en **Capítulo** (*Activo, Pasivo, Patrimonio*) y **Subcapítulo** (*Corriente, No Corriente*).
+
+## Modelo y medidas DAX
+
+Creé medidas para Activo Total, Pasivo Total, Patrimonio, los tres ratios y la variación porcentual contra el año anterior (análisis horizontal).
+
+<Figure
+  src={imgDax}
+  alt="Modelo de datos y medidas DAX en Power BI"
+  caption="Medidas DAX implementadas para totales patrimoniales, ratios financieros y variación YoY."
+/>
+
+## Páginas del dashboard
+
+- **ESF:** evolución de Activo, Pasivo y Patrimonio, composición corriente vs. no corriente y matriz del balance con filtro por año.
+
+<Figure
+  src={imgEsf}
+  alt="Página ESF del dashboard en Power BI"
+  caption="Vista ESF — Evolución de Activo, Pasivo y Patrimonio y composición corriente vs. no corriente."
+/>
+
+- **Análisis de Ratios:** Liquidez Inmediata, Razón Corriente y Razón de Deuda, con línea de tendencia y valores de referencia.
+
+<Figure
+  src={imgRatios}
+  alt="Página Análisis de Ratios del dashboard en Power BI"
+  caption="Vista Análisis de Ratios — Liquidez Inmediata, Razón Corriente y Razón de Deuda frente a umbrales de referencia."
+/>
+
+- **Análisis Horizontal:** variación porcentual por rubro, año contra año.
+
+<Figure
+  src={imgHorizontal}
+  alt="Página Análisis Horizontal del dashboard en Power BI"
+  caption="Vista Análisis Horizontal — Variación porcentual interanual (YoY) por rubro contable."
+/>
+
+---
+
+## Hallazgos
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Año</th>
+        <th>Razón de Deuda</th>
+        <th>Liquidez Inmediata</th>
+        <th>Razón Corriente</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>2022</td>
+        <td>0,58</td>
+        <td>0,27</td>
+        <td>2,36</td>
+      </tr>
+      <tr>
+        <td>2023</td>
+        <td>0,44</td>
+        <td>0,22</td>
+        <td>3,10</td>
+      </tr>
+      <tr>
+        <td>2024</td>
+        <td>0,42</td>
+        <td>0,35</td>
+        <td>2,98</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+- **Endeudamiento a la baja:** la Razón de Deuda bajó de 0,58 a 0,42. El pasivo total cayó de 293.391 a 243.511, y la deuda financiera (corriente + no corriente) de 210.747 a 162.578. En 2024 queda en el límite inferior del rango de referencia (0,4–0,6).
+- **El salto del patrimonio en 2023 (+48,5%) no vino de ganancias:** el Capital Social Realizado pasó de 184.233 a 304.233, un aporte de 120.000. Ese aporte explica la caída del endeudamiento ese año.
+- **Liquidez inmediata baja:** 0,35 en 2024, muy por debajo de la referencia de 0,8–1,0. Con la caja sola, la empresa no cubre sus deudas de corto plazo.
+- **Pero la Razón Corriente es holgada** (2,98, sobre el rango de 1,5–2,0). La diferencia se explica porque los inventarios pesan alrededor del 41% del activo corriente en 2024 (y 52% en 2023): la liquidez depende de que esa mercadería se venda y se cobre.
+- **Reperfilamiento de deuda:** el pasivo corriente cae 12,8% en 2023 y sube solo 2,3% en 2024, mientras el no corriente baja 15,3% y 7,7%. La deuda de largo plazo se está amortizando.
+
+## Conclusión
+
+La empresa redujo su apalancamiento y mejoró su caja en 2024 (+60%). El punto a vigilar es la dependencia de inventarios y cuentas por cobrar (+21% en 2024) para sostener la liquidez.

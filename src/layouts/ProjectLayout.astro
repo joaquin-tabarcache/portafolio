@@ -1,0 +1,103 @@
+---
+import BaseLayout from './BaseLayout.astro';
+
+interface NavProject {
+  title: string;
+  href: string;
+}
+
+interface MetaItem {
+  label: string;
+  value: string;
+}
+
+interface ExternalLink {
+  label: string;
+  href: string;
+}
+
+interface ProjectFrontmatter {
+  title: string;
+  description?: string;
+  number?: string;
+  stack?: string[];
+  meta?: MetaItem[];
+  externalLink?: ExternalLink;
+  prev?: NavProject;
+  next?: NavProject;
+}
+
+const rawProps = Astro.props as { frontmatter?: ProjectFrontmatter } & Partial<ProjectFrontmatter>;
+const fm: ProjectFrontmatter = rawProps.frontmatter ?? (rawProps as ProjectFrontmatter);
+const { title, description, number, stack = [], meta = [], externalLink, prev, next } = fm;
+---
+
+<BaseLayout title={`${title} — Leandro Joaquín Tabarcache`} description={description}>
+  <article class="mx-auto max-w-6xl px-6 pt-10 pb-20 sm:px-10 sm:pt-14">
+    <a href="/#proyectos" class="inline-flex items-center gap-2 text-sm text-ink-muted transition-colors hover:text-ink">
+      <span aria-hidden="true">←</span>
+      <span>Todos los proyectos</span>
+    </a>
+
+    <header class="mt-10 grid grid-cols-1 gap-10 border-b border-border pb-12 lg:grid-cols-12">
+      <div class="lg:col-span-8">
+        {number && <p class="eyebrow">Caso de estudio {number}</p>}
+        <h1 class="mt-4 text-[2rem] leading-[1.15] sm:text-[2.6rem]">
+          {title}
+        </h1>
+        {description && (
+          <p class="mt-5 max-w-2xl text-lg leading-relaxed text-ink-secondary">{description}</p>
+        )}
+        {externalLink && (
+          <a
+            href={externalLink.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="mt-7 inline-flex items-center gap-2 rounded-md bg-ink px-4 py-2.5 text-sm font-medium text-canvas transition hover:bg-accent"
+          >
+            {externalLink.label}
+            <span aria-hidden="true">↗</span>
+          </a>
+        )}
+      </div>
+
+      {(meta.length > 0 || stack.length > 0) && (
+        <dl class="self-end text-sm lg:col-span-4">
+          {meta.map((m) => (
+            <div class="flex justify-between gap-6 border-t border-border py-2.5">
+              <dt class="text-ink-muted">{m.label}</dt>
+              <dd class="text-right font-medium text-ink">{m.value}</dd>
+            </div>
+          ))}
+          {stack.length > 0 && (
+            <div class="flex justify-between gap-6 border-t border-border py-2.5">
+              <dt class="text-ink-muted">Stack</dt>
+              <dd class="text-right font-medium text-ink">{stack.join(' · ')}</dd>
+            </div>
+          )}
+        </dl>
+      )}
+    </header>
+
+    <div class="editorial-prose mx-auto mt-14 max-w-3xl">
+      <slot />
+    </div>
+
+    {(prev || next) && (
+      <nav aria-label="Navegación entre proyectos" class="mx-auto mt-24 grid max-w-3xl grid-cols-1 gap-px overflow-hidden border-y border-border sm:grid-cols-2">
+        {prev ? (
+          <a href={prev.href} class="group py-6 sm:pr-8">
+            <span class="eyebrow">← Anterior</span>
+            <span class="mt-2 block font-serif text-lg leading-snug text-ink transition-colors group-hover:text-accent">{prev.title}</span>
+          </a>
+        ) : <div class="hidden sm:block" />}
+        {next && (
+          <a href={next.href} class="group border-t border-border py-6 sm:border-t-0 sm:border-l sm:pl-8 sm:text-right">
+            <span class="eyebrow">Siguiente →</span>
+            <span class="mt-2 block font-serif text-lg leading-snug text-ink transition-colors group-hover:text-accent">{next.title}</span>
+          </a>
+        )}
+      </nav>
+    )}
+  </article>
+</BaseLayout>
